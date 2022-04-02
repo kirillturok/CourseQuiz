@@ -50,6 +50,35 @@ public class AccountController : ControllerBase
         return Content("Для завершения регистрации проверьте электронную почту и перейдите по ссылке, указанной в письме");
     }
 
+    [HttpPost("SendConfirmEmail")]
+    public async Task<IActionResult> SendConfirmEmail(EmailViewModel model)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest("Invalid data");
+
+        var user = await _userManager.FindByNameAsync(model.Email);
+
+        // проверяем, подтвержден ли email
+        if (await _userManager.IsEmailConfirmedAsync(user))
+        {
+            return BadRequest("email is already confirmed");
+        }
+
+        // генерация токена для пользователя
+        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+        var callbackUrl = Url.Action(
+        "ConfirmEmail",
+        "Account",
+        new { userId = user.Id, code = code },
+        protocol: HttpContext.Request.Scheme);
+
+        EmailService emailService = new EmailService();
+        await emailService.SendEmailAsync(model.Email, "Confirm your account",
+        $"Подтвердите регистрацию, перейдя по ссылке: <a href='{callbackUrl}'>link</a>");
+
+        return Content("Для завершения регистрации проверьте электронную почту и перейдите по ссылке, указанной в письме");
+    }
+
     [HttpGet("ConfirmEmail")]
     public async Task<IActionResult> ConfirmEmail(string userId, string code)
     {
@@ -72,7 +101,7 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost("ForgotPassword")]
-    public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
+    public async Task<IActionResult> ForgotPassword(EmailViewModel model)
     {
         if (ModelState.IsValid)
         {

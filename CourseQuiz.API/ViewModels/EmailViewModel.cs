@@ -2,7 +2,7 @@
 
 namespace CourseQuiz.API.ViewModels;
 
-public class ForgotPasswordViewModel
+public class EmailViewModel
 {
     [Required]
     [EmailAddress]
