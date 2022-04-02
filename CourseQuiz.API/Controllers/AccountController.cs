@@ -1,10 +1,12 @@
-﻿using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Authorization;
 using CourseQuiz.API.Models;
 using CourseQuiz.API.ViewModels;
 using CourseQuiz.API.Services;
+using AuthTutorial.Auth.Common;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace CourseQuiz.API.Controllers;
 
@@ -21,7 +23,7 @@ public class AccountController : ControllerBase
         _signInManager = signInManager;
     }
 
-    [HttpPost]
+    [HttpPost("Register")]
     public async Task<IActionResult> Register(RegisterViewModel model)
     {
         if (!ModelState.IsValid)
@@ -48,7 +50,7 @@ public class AccountController : ControllerBase
         return Content("Для завершения регистрации проверьте электронную почту и перейдите по ссылке, указанной в письме");
     }
 
-    [HttpGet]
+    [HttpGet("ConfirmEmail")]
     public async Task<IActionResult> ConfirmEmail(string userId, string code)
     {
         if (userId == null || code == null)
@@ -93,29 +95,19 @@ public class AccountController : ControllerBase
         return BadRequest("Invalid data");
     }
 
-    [HttpGet("ResetPassword")]
-    public IActionResult ResetPassword(string code = null)
-    {
-        return code == null ? BadRequest("code=null") : Ok("Hooray");
-    }
-
     [HttpPost("ResetPassword")]
     public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
     {
         if (!ModelState.IsValid)
-        {
             return BadRequest("Not valid data");
-        }
+
         var user = await _userManager.FindByEmailAsync(model.Email);
         if (user == null)
-        {
             return BadRequest("ResetPasswordConfirmation");
-        }
+
         var result = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
         if (result.Succeeded)
-        {
             return Ok();
-        }
 
         return BadRequest(result.Errors);
     }
@@ -135,20 +127,33 @@ public class AccountController : ControllerBase
         }
 
         var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
-        if (result.Succeeded)
-        {
-            return Ok("Signed in");
-        }
-        else
+        if (!result.Succeeded)
             return BadRequest("wrong password or user");
+
+        var token = GenerateJWT(model.Email);
+        return Ok(new
+        {
+            access_token = token
+        });
     }
 
-    /*[HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> LogOff()
+    private string GenerateJWT(string email)
     {
-        // удаляем аутентификационные куки
-        await _signInManager.SignOutAsync();
-        return RedirectToAction("Index", "Home");
-    }*/
+
+        var securityKey = AuthOptions.GetSymmetricSecurityKey;
+        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+
+        var claims = new List<Claim>()
+        {
+            new Claim(ClaimTypes.Email, email)
+        };
+
+        var token = new JwtSecurityToken(AuthOptions.ISSUER,
+            AuthOptions.AUDIENCE,
+            claims,
+            expires: DateTime.Now.AddDays(AuthOptions.LIFETIME),
+            signingCredentials: credentials);
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
 }
