@@ -49,7 +49,6 @@ public class AccountController : ControllerBase
     }
 
     [HttpGet]
-    [AllowAnonymous]
     public async Task<IActionResult> ConfirmEmail(string userId, string code)
     {
         if (userId == null || code == null)
@@ -71,8 +70,6 @@ public class AccountController : ControllerBase
     }
 
     [HttpPost("ForgotPassword")]
-    [AllowAnonymous]
-    //[ValidateAntiForgeryToken]
     public async Task<IActionResult> ForgotPassword(ForgotPasswordViewModel model)
     {
         if (ModelState.IsValid)
@@ -90,22 +87,19 @@ public class AccountController : ControllerBase
             var callbackUrl = Url.Action("ResetPassword", "Account", new { userId = user.Id, code = code }, protocol: HttpContext.Request.Scheme);
             EmailService emailService = new EmailService();
             await emailService.SendEmailAsync(model.Email, "Reset Password",
-                $"Для сброса пароля пройдите по ссылке: <a href='{callbackUrl}'>link</a>");
+                $"Для сброса пароля пройдите по ссылке: <a href='{callbackUrl}'>link</a><p>{code}</p>");
             return Ok("Sent");
         }
         return BadRequest("Invalid data");
     }
 
     [HttpGet("ResetPassword")]
-    [AllowAnonymous]
     public IActionResult ResetPassword(string code = null)
     {
         return code == null ? BadRequest("code=null") : Ok("Hooray");
     }
 
     [HttpPost("ResetPassword")]
-    [AllowAnonymous]
-//    [ValidateAntiForgeryToken]
     public async Task<IActionResult> ResetPassword(ResetPasswordViewModel model)
     {
         if (!ModelState.IsValid)
@@ -122,41 +116,32 @@ public class AccountController : ControllerBase
         {
             return Ok();
         }
-        
+
         return BadRequest(result.Errors);
     }
 
-    /*
-    [HttpPost]
-    [ValidateAntiForgeryToken]
+    [HttpPost("Login")]
     public async Task<IActionResult> Login(LoginViewModel model)
     {
-        if (ModelState.IsValid)
+        if (!ModelState.IsValid)
+            return BadRequest("Invalid data");
+
+        var user = await _userManager.FindByNameAsync(model.Email);
+
+        // проверяем, подтвержден ли email
+        if (!await _userManager.IsEmailConfirmedAsync(user))
         {
-            var user = await _userManager.FindByNameAsync(model.Email);
-            if (user != null)
-            {
-                // проверяем, подтвержден ли email
-                if (!await _userManager.IsEmailConfirmedAsync(user))
-                {
-                    ModelState.AddModelError(string.Empty, "Вы не подтвердили свой email");
-                    return View(model);
-                }
-            }
-
-            var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
-            if (result.Succeeded)
-            {
-                return RedirectToAction("Index", "Home");
-            }
-            else
-            {
-                ModelState.AddModelError("", "Неправильный логин и (или) пароль");
-            }
+            return BadRequest("email wasn't confirmed");
         }
-        return View(model);
-    }*/
 
+        var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
+        if (result.Succeeded)
+        {
+            return Ok("Signed in");
+        }
+        else
+            return BadRequest("wrong password or user");
+    }
 
     /*[HttpPost]
     [ValidateAntiForgeryToken]
