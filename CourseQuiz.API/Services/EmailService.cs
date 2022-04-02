@@ -1,6 +1,6 @@
 ﻿using MimeKit;
 using MailKit.Net.Smtp;
-using System.Threading.Tasks;
+using AuthTutorial.Auth.Common;
 
 namespace CourseQuiz.API.Services;
 
@@ -10,7 +10,7 @@ public class EmailService
     {
         var emailMessage = new MimeMessage();
 
-        emailMessage.From.Add(new MailboxAddress("Администрация сайта", "admin@metanit.com"));
+        emailMessage.From.Add(new MailboxAddress("Quiz Course", AuthOptions.EmailLogin));
         emailMessage.To.Add(new MailboxAddress("", email));
         emailMessage.Subject = subject;
         emailMessage.Body = new TextPart(MimeKit.Text.TextFormat.Html)
@@ -21,7 +21,7 @@ public class EmailService
         using (var client = new SmtpClient())
         {
             await client.ConnectAsync("smtp.gmail.com", 465, true);
-            await client.AuthenticateAsync("kirillturok10@gmail.com", "verydifficultkirill1010");
+            await client.AuthenticateAsync(AuthOptions.EmailLogin, AuthOptions.EmailPassword);
             await client.SendAsync(emailMessage);
 
             await client.DisconnectAsync(true);

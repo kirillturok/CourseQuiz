@@ -30,24 +30,15 @@ public class AccountController : ControllerBase
             return BadRequest("Some properties are not valid");
 
         User user = new User { Email = model.Email, UserName = model.Email };
-        // добавляем пользователя
+        //add user
         var result = await _userManager.CreateAsync(user, model.Password);
         if (!result.Succeeded)
             return BadRequest(result.Errors);
 
-        // генерация токена для пользователя
-        var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-        var callbackUrl = Url.Action(
-        "ConfirmEmail",
-        "Account",
-        new { userId = user.Id, code = code },
-        protocol: HttpContext.Request.Scheme);
-
-        EmailService emailService = new EmailService();
-        await emailService.SendEmailAsync(model.Email, "Confirm your account",
-        $"Подтвердите регистрацию, перейдя по ссылке: <a href='{callbackUrl}'>link</a>");
-
-        return Content("Для завершения регистрации проверьте электронную почту и перейдите по ссылке, указанной в письме");
+        if (await SendConfirmationEmail(user))
+            return Ok();
+        else
+            return StatusCode(500, "Couldn't send confirmation email");
     }
 
     [HttpPost("SendConfirmEmail")]
@@ -76,7 +67,7 @@ public class AccountController : ControllerBase
         await emailService.SendEmailAsync(model.Email, "Confirm your account",
         $"Подтвердите регистрацию, перейдя по ссылке: <a href='{callbackUrl}'>link</a>");
 
-        return Content("Для завершения регистрации проверьте электронную почту и перейдите по ссылке, указанной в письме");
+        return Ok();
     }
 
     [HttpGet("ConfirmEmail")]
@@ -184,5 +175,29 @@ public class AccountController : ControllerBase
             signingCredentials: credentials);
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    private async Task<bool> SendConfirmationEmail(User user)
+    {
+        try
+        {
+            //token generation for mail confirmation
+            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+            var callbackUrl = Url.Action(
+            "ConfirmEmail",
+            "Account",
+            new { userId = user.Id, code = code },
+            protocol: HttpContext.Request.Scheme);
+
+            EmailService emailService = new EmailService();
+            await emailService.SendEmailAsync(user.Email, "Confirm your account",
+            $"Thank you for registering. Please click the button to confirm your email address " +
+            $"<a href = '{callbackUrl}'>here</a>");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            return false;
+        }
     }
 }
