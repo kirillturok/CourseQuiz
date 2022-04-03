@@ -1,6 +1,6 @@
 ﻿using MimeKit;
 using MailKit.Net.Smtp;
-using AuthTutorial.Auth.Common;
+using CourseQuiz.API;
 
 namespace CourseQuiz.API.Services;
 

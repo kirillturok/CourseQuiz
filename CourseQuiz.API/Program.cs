@@ -1,4 +1,4 @@
-using AuthTutorial.Auth.Common;
+using CourseQuiz.API;
 using CourseQuiz.API.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using CourseQuiz.API.Models;
 using CourseQuiz.API.ViewModels;
 using CourseQuiz.API.Services;
-using AuthTutorial.Auth.Common;
+using CourseQuiz.API;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -48,6 +48,9 @@ public class AccountController : ControllerBase
             return BadRequest("Invalid data");
 
         var user = await _userManager.FindByNameAsync(model.Email);
+
+        if (user == null)
+            return Ok();
 
         // проверяем, подтвержден ли email
         if (await _userManager.IsEmailConfirmedAsync(user))
@@ -139,6 +142,8 @@ public class AccountController : ControllerBase
             return BadRequest("Invalid data");
 
         var user = await _userManager.FindByNameAsync(model.Email);
+        if (user == null)
+            return BadRequest("Wrong password or user");
 
         // проверяем, подтвержден ли email
         if (!await _userManager.IsEmailConfirmedAsync(user))
@@ -148,7 +153,7 @@ public class AccountController : ControllerBase
 
         var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
         if (!result.Succeeded)
-            return BadRequest("wrong password or user");
+            return BadRequest("Wrong password or user");
 
         var token = GenerateJWT(model.Email);
         return Ok(new

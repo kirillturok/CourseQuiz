@@ -1,7 +1,7 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace AuthTutorial.Auth.Common;
+namespace CourseQuiz.API;
 
 public static class AuthOptions
 {
