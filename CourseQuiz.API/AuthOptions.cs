@@ -14,3 +14,9 @@ public static class AuthOptions
     public static SymmetricSecurityKey GetSymmetricSecurityKey =
         new SymmetricSecurityKey(Encoding.ASCII.GetBytes(KEY));
 }
+
+public enum Role
+{
+    User,
+    Participant
+}

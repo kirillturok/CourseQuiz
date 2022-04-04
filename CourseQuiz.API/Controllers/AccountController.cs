@@ -36,7 +36,7 @@ public class AccountController : ControllerBase
             return BadRequest(result.Errors);
 
         if (await SendConfirmationEmail(user))
-            return Ok();
+            return Ok("Check your email");
         else
             return StatusCode(500, "Couldn't send confirmation email");
     }
@@ -155,21 +155,22 @@ public class AccountController : ControllerBase
         if (!result.Succeeded)
             return BadRequest("Wrong password or user");
 
-        var token = GenerateJWT(model.Email);
+        var token = GenerateJWT(model.Email,Role.User);
         return Ok(new
         {
             access_token = token
         });
     }
 
-    private string GenerateJWT(string email)
+    private string GenerateJWT(string email,Role role)
     {
         var securityKey = AuthOptions.GetSymmetricSecurityKey;
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
         var claims = new List<Claim>()
         {
-            new Claim(ClaimTypes.Email, email)
+            new Claim(ClaimTypes.Email, email),
+            new Claim(ClaimTypes.Role,role.ToString())
         };
 
         var token = new JwtSecurityToken(AuthOptions.ISSUER,
@@ -201,6 +202,7 @@ public class AccountController : ControllerBase
         }
         catch (Exception ex)
         {
+            Console.Error.WriteLine(ex);
             return false;
         }
     }

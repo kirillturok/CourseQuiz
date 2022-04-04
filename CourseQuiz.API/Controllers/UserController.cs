@@ -9,8 +9,14 @@ namespace CourseQuiz.API.Controllers;
 public class UserController : ControllerBase
 {
     [HttpGet("Get")]
-    //[Authorize]
+    [Authorize]
     public IActionResult Get()
+    {
+        return Ok("YYYYes");
+    }
+
+    [HttpGet("Gett")]
+    public IActionResult Gett()
     {
         return Ok("YYYYes");
     }
