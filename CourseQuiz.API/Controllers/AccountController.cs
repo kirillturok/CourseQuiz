@@ -164,7 +164,6 @@ public class AccountController : ControllerBase
 
     private string GenerateJWT(string email)
     {
-
         var securityKey = AuthOptions.GetSymmetricSecurityKey;
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 

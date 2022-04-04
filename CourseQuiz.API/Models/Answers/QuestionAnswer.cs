@@ -7,5 +7,5 @@ public class QuestionAnswer
     public int Id { get; set; }
     public Question Question { get; set; }
     public List<UsersAnswer> Answers { get; set; }
-    public int MyProperty { get; set; }
+    public UsersTextAnswer TextAnswer { get; set; }
 }

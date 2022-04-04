@@ -6,6 +6,7 @@ namespace CourseQuiz.API.Models;
 
 public class User : IdentityUser
 {
-    //public UserAdditional UserAdditional { get; set; }
+    public UserAdditional UserAdditional { get; set; }
+    public List<Quiz.Quiz> Quizes { get; set; }
     public List<QuizAnswer> QuizAnswers { get; set; }
 }
