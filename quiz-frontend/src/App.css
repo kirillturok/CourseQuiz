@@ -1,0 +1,65 @@
+*{
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'poppins',sans-serif;
+}
+
+body{
+  display: grid;
+  place-items: center;
+  text-align: center;
+  background: #102057;
+  height: 100%;
+}
+
+body::before{
+  content:"";
+  position: absolute;
+  top:0;
+  left: 0;
+  width:100%;
+  height:100%;
+  background:linear-gradient(#fa9d74,#eb0069);
+  clip-path: polygon(30% 10%,50% 40%,30% 75%,10% 40%);
+}
+
+body::after{
+  content:"";
+  position: absolute;
+  top:0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(#f50202,#1928f5);
+  clip-path: circle(20% at 70% 75%);
+}
+
+.boxes{
+  border-radius: 10px;
+    background: rgba(255,255,255,0.05); 
+    overflow: hidden;
+    z-index: 10;
+    backdrop-filter: blur(15px);
+    box-shadow: 5px 5px 30px rgba(0,0,0,0.2);
+}
+
+/*HOME, login form*/
+.header-text{
+  font-size: 33px;
+  font-weight: 600;
+  color:white;
+}
+
+/*Forgot password, login, signuo*/
+.links-route{
+  margin: 10px 10px;
+  font-size:16px;
+  color:white;
+  text-decoration: none;
+}
+
+.links-route:hover{
+  color:white;
+  text-decoration: underline;
+}

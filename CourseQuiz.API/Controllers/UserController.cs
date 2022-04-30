@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using CourseQuiz.API.DTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,10 +9,11 @@ namespace CourseQuiz.API.Controllers;
 [ApiController]
 public class UserController : ControllerBase
 {
-    [HttpGet("Get")]
-    [Authorize]
-    public IActionResult Get()
+    [HttpPost("create-quiz")]
+    [Authorize(Roles = "user")]
+    public IActionResult CreateQuiz([FromBody]QuizForCreationDto quiz)
     {
+
         return Ok("YYYYes");
     }
 

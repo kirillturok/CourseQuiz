@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Identity;
 using CourseQuiz.API.Models;
 using CourseQuiz.API.ViewModels;
 using CourseQuiz.API.Services;
-using CourseQuiz.API;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -68,7 +67,7 @@ public class AccountController : ControllerBase
 
         EmailService emailService = new EmailService();
         await emailService.SendEmailAsync(model.Email, "Confirm your account",
-        $"Подтвердите регистрацию, перейдя по ссылке: <a href='{callbackUrl}'>link</a>");
+        $"Confirm your registration <a href='{callbackUrl}'>here</a>");
 
         return Ok();
     }

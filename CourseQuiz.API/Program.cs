@@ -5,12 +5,25 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
+var corsPolicy = "corsOrigins";
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 AuthOptions.EmailLogin = args[0];
 AuthOptions.EmailPassword = args[1];
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(corsPolicy,
+                          policy =>
+                          {
+                              policy.WithOrigins("http://localhost:3000")
+                                                  .AllowAnyHeader()
+                                                  .AllowAnyMethod();
+                          });
+});
 
 string conStr = "Server=localhost;Database=CourseQuiz;Trusted_Connection=True;MultipleActiveResultSets=true";
 builder.Services.AddDbContext<ApplicationContext>(options => options.UseSqlServer(conStr));
@@ -69,6 +82,8 @@ app.UseHttpsRedirection();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+app.UseCors(corsPolicy);
 
 app.MapControllers();
 
